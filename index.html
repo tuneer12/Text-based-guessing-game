@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Guessing Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #6a3232, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(89, 48, 48, 0.5);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #947a2b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .word-display {
+            font-size: 2.5rem;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            font-weight: bold;
+            color: #fdbb2d;
+        }
+        
+        .hint-box {
+            background-color: rgba(178, 31, 31, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .input-area {
+            margin: 20px 0;
+        }
+        
+        input {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            width: 70%;
+            max-width: 300px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        button {
+            background: #fdbb2d;
+            color: #272b3a;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+            transform: scale(1.05);
+        }
+        
+        #new-game {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        #hint-btn {
+            background: #443d3d;
+            color: white;
+        }
+        
+        .message {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            min-height: 30px;
+            color: #ffcc44;
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .win-animation {
+            animation: winPulse 1.5s infinite;
+        }
+        
+        @keyframes winPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .deployment-options {
+            margin-top: 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        .deployment-options h2 {
+            margin-bottom: 15px;
+            color: #fdbb2d;
+        }
+        
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .deployment-option {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .deployment-option h3 {
+            color: #fdbb2d;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .word-display {
+                font-size: 1.8rem;
+                letter-spacing: 5px;
+            }
+            
+            input {
+                width: 90%;
+            }
+            
+            .deployment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mystery Word Guesser</h1>
+        
+        <div class="game-info">
+            <div>Guesses: <span id="guesses">0</span></div>
+            <div>Score: <span id="score">0</span></div>
+        </div>
+        
+        <div class="word-display" id="word-display">_ _ _ _ _</div>
+        
+        <div class="hint-box">
+            <p>Hint: <span id="hint-text">The word is related to programming</span></p>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="guess-input" maxlength="1" placeholder="Enter a letter">
+            <button id="submit-btn">Submit Guess</button>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="actions">
+            <button id="hint-btn">Get Hint</button>
+            <button id="new-game">New Game</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Guess the hidden word by entering one letter at a time</li>
+                <li>You have a limited number of incorrect guesses</li>
+                <li>Each correct guess reveals the letter in the word</li>
+                <li>Each incorrect guess reduces your remaining attempts</li>
+                <li>Complete the word before running out of attempts to win!</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="deployment-options">
+        <h2>Where to Deploy Your Game</h2>
+        <p>Here are the best platforms to deploy your game website:</p>
+        
+        <div class="deployment-grid">
+            <div class="deployment-option">
+                <h3>GitHub Pages</h3>
+                <p>Free, easy to use, perfect for static sites. Great for beginners.</p>
+            </div>
+            <div class="deployment-option">
+                <h3>Netlify</h3>
+                <p>Free tier, continuous deployment, form handling, and more.</p>
+            </div>
+            <div class="deployment-option">
+                <h3>Vercel</h3>
+                <p>Excellent for frontend projects with automatic deployments.</p>
+            </div>
+            <div class="deployment-option">
+                <h3>GitLab Pages</h3>
+                <p>Similar to GitHub Pages with built-in CI/CD pipelines.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game variables
+            let words = [
+                { word: "javascript", hint: "A popular programming language for web development" },
+                { word: "algorithm", hint: "A step-by-step procedure to solve a problem" },
+                { word: "variable", hint: "A container for storing data values" },
+                { word: "function", hint: "A block of code designed to perform a particular task" },
+                { word: "database", hint: "An organized collection of structured information" },
+                { word: "framework", hint: "A platform for developing software applications" },
+                { word: "debugging", hint: "The process of finding and fixing errors in code" },
+                { word: "responsive", hint: "Web design that adapts to different screen sizes" }
+            ];
+            
+            let currentWord = '';
+            let guessedLetters = [];
+            let wrongGuesses = 0;
+            let maxWrongGuesses = 6;
+            let score = 0;
+            let gameActive = false;
+            
+            // DOM elements
+            const wordDisplay = document.getElementById('word-display');
+            const hintText = document.getElementById('hint-text');
+            const guessInput = document.getElementById('guess-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const newGameBtn = document.getElementById('new-game');
+            const message = document.getElementById('message');
+            const guessesEl = document.getElementById('guesses');
+            const scoreEl = document.getElementById('score');
+            
+            // Initialize game
+            initGame();
+            
+            // Event listeners
+            submitBtn.addEventListener('click', processGuess);
+            hintBtn.addEventListener('click', showHint);
+            newGameBtn.addEventListener('click', initGame);
+            guessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    processGuess();
+                }
+            });
+            
+            // Initialize a new game
+            function initGame() {
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * words.length);
+                currentWord = words[randomIndex].word;
+                
+                // Reset game state
+                guessedLetters = [];
+                wrongGuesses = 0;
+                gameActive = true;
+                
+                // Update UI
+                hintText.textContent = words[randomIndex].hint;
+                updateWordDisplay();
+                message.textContent = '';
+                guessesEl.textContent = wrongGuesses + '/' + maxWrongGuesses;
+                
+                // Focus on input
+                guessInput.value = '';
+                guessInput.focus();
+                
+                // Update score display
+                scoreEl.textContent = score;
+            }
+            
+            // Update the word display with guessed letters
+            function updateWordDisplay() {
+                let display = '';
+                for (const letter of currentWord) {
+                    if (guessedLetters.includes(letter)) {
+                        display += letter + ' ';
+                    } else {
+                        display += '_ ';
+                    }
+                }
+                wordDisplay.textContent = display.trim();
+                
+                // Check if player has won
+                if (!display.includes('_')) {
+                    endGame(true);
+                }
+            }
+            
+            // Process a guess
+            function processGuess() {
+                if (!gameActive) return;
+                
+                const guess = guessInput.value.toLowerCase();
+                guessInput.value = '';
+                
+                // Validate input
+                if (!guess || !/^[a-z]$/.test(guess)) {
+                    message.textContent = 'Please enter a valid letter';
+                    return;
+                }
+                
+                // Check if letter was already guessed
+                if (guessedLetters.includes(guess)) {
+                    message.textContent = 'You already guessed that letter!';
+                    return;
+                }
+                
+                // Add to guessed letters
+                guessedLetters.push(guess);
+                
+                // Check if guess is correct
+                if (currentWord.includes(guess)) {
+                    message.textContent = 'Correct guess!';
+                } else {
+                    wrongGuesses++;
+                    message.textContent = `Wrong guess! ${maxWrongGuesses - wrongGuesses} attempts remaining.`;
+                    guessesEl.textContent = wrongGuesses + '/' + maxWrongGuesses;
+                    
+                    // Check if player has lost
+                    if (wrongGuesses >= maxWrongGuesses) {
+                        endGame(false);
+                    }
+                }
+                
+                updateWordDisplay();
+            }
+            
+            // Show an additional hint
+            function showHint() {
+                if (!gameActive) return;
+                
+                // Find a letter that hasn't been guessed yet
+                const unguessedLetters = [];
+                for (const letter of currentWord) {
+                    if (!guessedLetters.includes(letter) && !unguessedLetters.includes(letter)) {
+                        unguessedLetters.push(letter);
+                    }
+                }
+                
+                if (unguessedLetters.length > 0) {
+                    const randomHint = unguessedLetters[Math.floor(Math.random() * unguessedLetters.length)];
+                    message.textContent = `Hint: The word contains the letter '${randomHint}'`;
+                    
+                    // Small penalty for using hint
+                    score = Math.max(0, score - 2);
+                    scoreEl.textContent = score;
+                } else {
+                    message.textContent = 'No hints available!';
+                }
+            }
+            
+            // End the game
+            function endGame(isWin) {
+                gameActive = false;
+                
+                if (isWin) {
+                    message.textContent = `Congratulations! You guessed the word: ${currentWord}`;
+                    wordDisplay.classList.add('win-animation');
+                    score += 10;
+                    scoreEl.textContent = score;
+                } else {
+                    message.textContent = `Game over! The word was: ${currentWord}`;
+                    wordDisplay.textContent = currentWord;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
